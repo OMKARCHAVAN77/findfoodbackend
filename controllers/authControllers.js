@@ -108,19 +108,22 @@ const getUser = async(req, res) => {
 const messFormRendering = async(req, res) => {
   try {
     const data = req.data.id
-    console.log("messFormRendering", data);
+    console.log("messFormRendering userId:", data);
 
     const checkMessDetails = await MessDetail.findOne({userId: data})
+    console.log("checkMessDetails:", checkMessDetails);
 
     if(checkMessDetails) {
-      return res.status(400).json({
-        success: false,
-        msg: "Data already exists"
+      // ✅ Has data — existing owner — go to dashboard
+      return res.status(200).json({
+        success: true,
+        msg: "Data already exists — go to dashboard"
       })
     } else {
-      res.status(200).json({
-        success: true,
-        msg: "Data does not exist"
+      // ✅ No data — new owner — go to ownerdetails
+      return res.status(400).json({
+        success: false,
+        msg: "Data does not exist — go to ownerdetails"
       })
     }
 
