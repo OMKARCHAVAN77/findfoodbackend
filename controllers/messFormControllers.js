@@ -3,44 +3,41 @@ const MessDetail = require("../models/messDetails");
 const PriceDetail = require("../models/priceDetails");
 const TimeDetail = require("../models/timeDetails");
 
+const saveMessData = async(req, res) => {
+  try {
+    const {menuDetails, priceDetails, timeDetails, messDetails} = req.body
 
-const saveMessData = async(req,res)=>{
-    try {        
-        const {menuDetails,priceDetails,timeDetails,messDetails} = req.body
+    console.log('saveMessData called');
+    console.log('messDetails:', messDetails);
 
-        console.log(menuDetails);
-        console.log(priceDetails);
-        console.log(timeDetails);
-        console.log(messDetails);
+    const messData = new MessDetail(messDetails)
+    const menuData = new MenuDetail(menuDetails)
+    const priceData = new PriceDetail(priceDetails)
+    const timeData = new TimeDetail(timeDetails)
 
-        console.log(req.body);
+    await Promise.all([
+      messData.save(),
+      menuData.save(),
+      priceData.save(),
+      timeData.save()
+    ])
 
-        const messData = new MessDetail(messDetails)
-        const menuData = new MenuDetail(menuDetails)
-        const priceData = new PriceDetail(priceDetails)
-        const timeData = new TimeDetail(timeDetails)
+    console.log('All data saved successfully');
 
-        await Promise.all([
-            messData.save(),
-            menuData.save(),
-            priceData.save(),
-            timeData.save()
-        ])
+    res.status(200).json({
+      success: true,
+      msg: "Data stored successfully"
+    })
 
-        res.status(200).json({
-            data:"data stored",
-            success: true,
-            menuDetails:menuDetails,
-            priceDetails:priceDetails,
-            timeDetails:timeDetails,
-            messDetails:messDetails
-        })
-
-    } catch (error) {
-        console.log(error);
-    }
-} 
-
+  } catch (error) {
+    console.log('saveMessData error:', error);
+    // ✅ Send error response — was missing before
+    res.status(500).json({
+      success: false,
+      msg: "Error saving data: " + error.message
+    })
+  }
+}
 const messDetailsData = async(req,res)=>{
     try {
         
