@@ -24,11 +24,18 @@ const corsOption = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: 'POST,GET,PATCH,DELETE,HEAD,OPTIONS',
+  methods: ['POST', 'GET', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   credentials: true,
+  optionsSuccessStatus: 200  // ✅ fixes preflight for older browsers
 }
 
+// ✅ Must be before everything else
 app.use(cors(corsOption));
+
+// ✅ Handle ALL preflight requests immediately
+app.options('*', cors(corsOption));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.text());
@@ -39,5 +46,4 @@ app.use("/api/user/", customerRoute)
 
 dbConnect()
 
-// ✅ This is required for Vercel — replaces app.listen()
 module.exports = app;
