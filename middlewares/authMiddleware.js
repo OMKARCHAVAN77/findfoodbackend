@@ -2,11 +2,10 @@ const jwt = require('jsonwebtoken')
 
 const authMiddleware = async(req, res, next) => {
   try {
-    // Read from Authorization header (Bearer token)
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    console.log("token", token);
+    console.log("authMiddleware token:", token ? "present" : "missing");
 
     if(!token) {
       return res.status(400).json({
@@ -17,7 +16,7 @@ const authMiddleware = async(req, res, next) => {
 
     jwt.verify(token, process.env.Token_key, (err, decode) => {
       if(err) {
-        console.log(err)
+        console.log('JWT verify error:', err)
         return res.status(400).json({
           success: false,
           msg: "Invalid token"
@@ -28,7 +27,8 @@ const authMiddleware = async(req, res, next) => {
     })
 
   } catch (error) {
-    console.log(error);
+    console.log('authMiddleware error:', error);
+    res.status(500).json({success: false, msg: "Server error"})
   }
 }
 

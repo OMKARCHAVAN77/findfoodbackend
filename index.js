@@ -24,10 +24,18 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.text());
 
+// Connect to database before every request
+app.use(async (req, res, next) => {
+  try {
+    await dbConnect();
+    next();
+  } catch (error) {
+    res.status(500).json({ success: false, msg: "Database connection failed" });
+  }
+});
+
 app.use("/api/user/", router);
 app.use("/api/user/", messDataRoutes);
 app.use("/api/user/", customerRoute);
-
-dbConnect();
 
 module.exports = app;

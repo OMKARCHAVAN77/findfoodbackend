@@ -3,10 +3,9 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
 const MessDetail = require("../models/messDetails");
 
-
 const addUser = async(req, res) => {
   try {
-    console.log(req.body);
+    console.log('addUser called, body:', req.body);
     const {userId, password, role} = req.body;
 
     if(!userId || !password || !role) {
@@ -34,6 +33,7 @@ const addUser = async(req, res) => {
     })
 
     await user.save()
+    console.log('User saved successfully');
 
     res.status(200).json({
       success: true,
@@ -41,18 +41,17 @@ const addUser = async(req, res) => {
     })
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({success: false, msg: "Server error"})
+    console.log('addUser error:', error);
+    res.status(500).json({success: false, msg: "Server error: " + error.message})
   }
 }
 
 const loginUser = async(req, res) => {
   try {
-    console.log(req.body);
+    console.log('loginUser called, body:', req.body);
     const {userId, password} = req.body;
 
     const userExist = await User.findOne({username: userId})
-    console.log("existing data", userExist);
 
     if(!userExist) {
       return res.status(401).json({
@@ -70,41 +69,37 @@ const loginUser = async(req, res) => {
       })
     }
 
-    if(checkPass) {
-      const payLoad = {
-        id: userExist._id,
-        username: userExist.username,
-        role: userExist.role
-      }
-
-      const token = await jwt.sign(payLoad, process.env.Token_key, {expiresIn: 60 * 60 * 5})
-
-      const tokenOption = {
-        httpOnly: true,
-        sameSite: "none",
-        secure: true
-      }
-
-      return res.cookie("token", token, tokenOption).status(200).json({
-        success: true,
-        msg: "User log in successfully...",
-        data: token,
-        role: userExist.role,
-        userId: userExist._id
-      })
+    const payLoad = {
+      id: userExist._id,
+      username: userExist.username,
+      role: userExist.role
     }
 
+    const token = jwt.sign(payLoad, process.env.Token_key, {expiresIn: 60 * 60 * 5})
+
+    const tokenOption = {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true
+    }
+
+    return res.cookie("token", token, tokenOption).status(200).json({
+      success: true,
+      msg: "User log in successfully...",
+      data: token,
+      role: userExist.role,
+      userId: userExist._id
+    })
+
   } catch (error) {
-    console.log(error);
-    res.status(500).json({success: false, msg: "Server error"})
+    console.log('loginUser error:', error);
+    res.status(500).json({success: false, msg: "Server error: " + error.message})
   }
 }
 
 const getUser = async(req, res) => {
   try {
-    res.status(201).json({
-      data: "not found"
-    })
+    res.status(201).json({ data: "not found" })
   } catch (error) {
     console.log(error);
   }
@@ -130,8 +125,8 @@ const messFormRendering = async(req, res) => {
     }
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({success: false, msg: "Server error"})
+    console.log('messFormRendering error:', error);
+    res.status(500).json({success: false, msg: "Server error: " + error.message})
   }
 }
 

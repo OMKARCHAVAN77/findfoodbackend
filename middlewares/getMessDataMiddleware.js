@@ -2,9 +2,10 @@ const jwt = require('jsonwebtoken')
 
 const getMessDataMiddleware = async(req, res, next) => {
   try {
-    // ✅ Read from Authorization header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
+
+    console.log("getMessDataMiddleware token:", token ? "present" : "missing");
 
     if(!token) {
       return res.status(400).json({
@@ -15,18 +16,19 @@ const getMessDataMiddleware = async(req, res, next) => {
 
     jwt.verify(token, process.env.Token_key, (err, decode) => {
       if(err) {
-        console.log(err);
+        console.log('JWT verify error:', err)
         return res.status(400).json({
           success: false,
           msg: "Invalid token"
         })
       }
       req.data = decode;
-      next(); // ✅ moved inside verify callback
+      next();
     })
 
   } catch (error) {
-    console.log(error);
+    console.log('getMessDataMiddleware error:', error);
+    res.status(500).json({success: false, msg: "Server error"})
   }
 }
 
