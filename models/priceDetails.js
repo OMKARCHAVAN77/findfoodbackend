@@ -17,9 +17,11 @@ const priceDetailsSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  // ✅ NOT required — only filled when mess type is Non-veg
   specialDaynonVegCharges: {
     type: String,
-    required: true,
+    required: false,
+    default: "0",
   },
 });
 
