@@ -8,14 +8,29 @@ const customerRoute = require("./routes/customerRoutes");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+// ✅ COOP header fix — allows Google OAuth popup
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+});
+
 app.use(cors({
-  origin: true,
+  origin: [
+    'http://localhost:4200',
+    'https://messapp-mu.vercel.app',
+    'https://messapp-8uim2u24z-omkarchavan77s-projects.vercel.app'
+  ],
   credentials: true,
   optionsSuccessStatus: 200
 }));
 
 app.options('*', cors({
-  origin: true,
+  origin: [
+    'http://localhost:4200',
+    'https://messapp-mu.vercel.app',
+    'https://messapp-8uim2u24z-omkarchavan77s-projects.vercel.app'
+  ],
   credentials: true,
   optionsSuccessStatus: 200
 }));
