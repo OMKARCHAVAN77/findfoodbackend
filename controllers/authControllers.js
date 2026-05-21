@@ -97,6 +97,79 @@ const loginUser = async(req, res) => {
   }
 }
 
+// ✅ NEW Google Login
+const googleLogin = async(req, res) => {
+  try {
+    console.log('googleLogin called, body:', req.body);
+    const { name, email, photo, googleId } = req.body;
+
+    if(!googleId || !email) {
+      return res.status(400).json({
+        success: false,
+        msg: "Google data missing"
+      })
+    }
+
+    // ✅ Check if user already exists with googleId
+    let user = await User.findOne({ googleId: googleId });
+
+    if(!user) {
+      // ✅ Check if user exists with same email
+      user = await User.findOne({ username: email });
+    }
+
+    if(!user) {
+      // ✅ New user — create account
+      user = new User({
+        name: name,
+        username: email,
+        email: email,
+        photo: photo,
+        googleId: googleId,
+        role: 'Customer'
+      });
+      await user.save();
+      console.log('New Google user saved:', user);
+    } else {
+      // ✅ Existing user — update Google info
+      user.googleId = googleId;
+      user.photo = photo;
+      user.name = name;
+      await user.save();
+      console.log('Existing Google user updated:', user);
+    }
+
+    // ✅ Generate JWT token
+    const payLoad = {
+      id: user._id,
+      username: user.username,
+      role: user.role
+    }
+
+    const token = jwt.sign(payLoad, process.env.Token_key, {expiresIn: 60 * 60 * 5})
+
+    const tokenOption = {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true
+    }
+
+    return res.cookie("token", token, tokenOption).status(200).json({
+      success: true,
+      msg: "Google login successful",
+      data: token,
+      role: user.role,
+      userId: user._id,
+      name: user.name,
+      photo: user.photo
+    })
+
+  } catch (error) {
+    console.log('googleLogin error:', error);
+    res.status(500).json({success: false, msg: "Server error: " + error.message})
+  }
+}
+
 const getUser = async(req, res) => {
   try {
     res.status(201).json({ data: "not found" })
@@ -114,13 +187,11 @@ const messFormRendering = async(req, res) => {
     console.log("checkMessDetails:", checkMessDetails);
 
     if(checkMessDetails) {
-      // ✅ Has data — existing owner — go to dashboard
       return res.status(200).json({
         success: true,
         msg: "Data already exists — go to dashboard"
       })
     } else {
-      // ✅ No data — new owner — go to ownerdetails
       return res.status(400).json({
         success: false,
         msg: "Data does not exist — go to ownerdetails"
@@ -149,4 +220,4 @@ const logoutUser = async(req, res) => {
   }
 }
 
-module.exports = {addUser, loginUser, getUser, messFormRendering, logoutUser}
+module.exports = {addUser, loginUser, getUser, messFormRendering, logoutUser, googleLogin}

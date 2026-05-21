@@ -12,6 +12,15 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String
+    },
+    googleId: {
+        type: String
+    },
+    email: {
+        type: String
+    },
+    photo: {
+        type: String
     }
 })
 
